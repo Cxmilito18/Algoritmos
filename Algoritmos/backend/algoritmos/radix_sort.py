@@ -7,24 +7,22 @@ def radix_sort(arr):
     exp = 1
 
     while max_num // exp > 0:
-        # Crear 10 cubetas vacías
+        # 10 cubetas vacías (dígitos 0-9)
         buckets = [[] for _ in range(10)]
 
-        # Colocar cada número en la cubeta según el dígito actual
+        # Distribuir según el dígito actual
         for num in arr:
             index = (num // exp) % 10
             buckets[index].append(num)
 
         # Guardar snapshot de las cubetas en este paso
+        # (copia de cada lista para que no muten en la siguiente iteración)
         pasos.append([bucket.copy() for bucket in buckets])
 
-        # Reconstruir el arreglo concatenando las cubetas
+        # Reconstruir el array aplanando las cubetas
         arr = [num for bucket in buckets for num in bucket]
 
-        # Guardar snapshot del arreglo reconstruido (para las barras)
-        pasos.append(arr.copy())
-
-        # Pasar al siguiente dígito
+        # Avanzar al siguiente dígito
         exp *= 10
 
     return pasos
