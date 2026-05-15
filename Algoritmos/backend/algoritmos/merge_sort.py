@@ -1,18 +1,31 @@
-def merge_sort(arr):
-    pasos = []
+def merge(arr, l, m, r, pasos):
+    n1 = m - l + 1
+    n2 = r - m
 
-    def dividir(lista):
-        if len(lista) <= 1:
-            nodo = {"valor": lista}
-            pasos.append(nodo.copy())
-            return nodo
-        mid = len(lista) // 2
-        izquierda = dividir(lista[:mid])
-        derecha = dividir(lista[mid:])
-        nodo = {"valor": lista, "izquierda": izquierda, "derecha": derecha}
-        pasos.append(nodo.copy())
-        return nodo
+    L = arr[l:m+1]
+    R = arr[m+1:r+1]
 
-    arbol = dividir(arr)
-    pasos.append(arbol)
-    return pasos
+    i = j = 0
+    k = l
+
+    while i < n1 and j < n2:
+        if L[i] <= R[j]:
+            arr[k] = L[i]
+            i += 1
+        else:
+            arr[k] = R[j]
+            j += 1
+        k += 1
+        pasos.append(arr.copy())  # 🔹 copia nueva
+
+    while i < n1:
+        arr[k] = L[i]
+        i += 1
+        k += 1
+        pasos.append(arr.copy())
+
+    while j < n2:
+        arr[k] = R[j]
+        j += 1
+        k += 1
+        pasos.append(arr.copy())
