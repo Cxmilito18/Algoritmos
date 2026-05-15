@@ -20,11 +20,11 @@ const INFO_ALGORITMOS = {
       "Fusiona las dos mitades ordenadas comparando elemento por elemento.",
       "Repite hasta que todo el arreglo esté ordenado.",
     ],
-    mejorCaso:   "O(n log n)",
-    casoPromedio:"O(n log n)",
-    peorCaso:    "O(n log n)",
-    espacio:     "O(n)",
-    estable:     true,
+    mejorCaso:    "O(n log n)",
+    casoPromedio: "O(n log n)",
+    peorCaso:     "O(n log n)",
+    espacio:      "O(n)",
+    estable:      true,
     color: "#3b82f6",
   },
   radix: {
@@ -39,11 +39,11 @@ const INFO_ALGORITMOS = {
       "Concatena las cubetas en orden.",
       "Repite para decenas, centenas, etc.",
     ],
-    mejorCaso:   "O(nk)",
-    casoPromedio:"O(nk)",
-    peorCaso:    "O(nk)",
-    espacio:     "O(n + k)",
-    estable:     true,
+    mejorCaso:    "O(nk)",
+    casoPromedio: "O(nk)",
+    peorCaso:     "O(nk)",
+    espacio:      "O(n + k)",
+    estable:      true,
     color: "#a855f7",
   },
   bucket: {
@@ -58,44 +58,23 @@ const INFO_ALGORITMOS = {
       "Ordena individualmente cada cubeta.",
       "Concatena todas las cubetas en orden.",
     ],
-    mejorCaso:   "O(n + k)",
-    casoPromedio:"O(n + k)",
-    peorCaso:    "O(n²)",
-    espacio:     "O(n + k)",
-    estable:     true,
+    mejorCaso:    "O(n + k)",
+    casoPromedio: "O(n + k)",
+    peorCaso:     "O(n²)",
+    espacio:      "O(n + k)",
+    estable:      true,
     color: "#22c55e",
   },
 };
 
 // ===== BIG-O DATA =====
 const BIG_O_NS = [1, 5, 10, 20, 50, 100, 200, 500];
-function nlogn(n) { return n * Math.log2(n); }
-function nk(n)    { return n * 3; }         // k ≈ 3 dígitos promedio
-function nplusk(n) { return n + 10; }        // k = 10 buckets
-function ncuad(n) { return n * n; }
+function nlogn(n)  { return n * Math.log2(n); }
+function nk(n)     { return n * 3; }        // k ≈ 3 dígitos promedio
+function nplusk(n) { return n + 10; }       // k = 10 buckets
+function ncuad(n)  { return n * n; }
 
-// ===== MERGE SORT =====
-function mergeSort(arr) {
-  const pasos = [];
-  pasos.push([...arr]);
-  function merge(left, right) {
-    let result = [], i = 0, j = 0;
-    while (i < left.length && j < right.length) {
-      if (left[i] <= right[j]) result.push(left[i++]);
-      else result.push(right[j++]);
-      pasos.push([...result, ...left.slice(i), ...right.slice(j)]);
-    }
-    return [...result, ...left.slice(i), ...right.slice(j)];
-  }
-  function sort(arr) {
-    if (arr.length <= 1) return arr;
-    const mid = Math.floor(arr.length / 2);
-    return merge(sort(arr.slice(0, mid)), sort(arr.slice(mid)));
-  }
-  sort([...arr]);
-  return pasos;
-}
-
+// ===== MERGE TREE (se sigue construyendo en frontend) =====
 function buildMergeTree(arr) {
   if (!arr || arr.length === 0) return null;
   if (arr.length === 1) return { valor: arr, izquierda: null, derecha: null };
@@ -105,49 +84,6 @@ function buildMergeTree(arr) {
     izquierda: buildMergeTree(arr.slice(0, mid)),
     derecha:   buildMergeTree(arr.slice(mid)),
   };
-}
-
-// ===== BUCKET SORT =====
-function bucketSort(arr) {
-  const pasosBarra = [[...arr]];
-  const pasosCubetas = [];
-  const min = Math.min(...arr), max = Math.max(...arr);
-  const bucketCount = Math.min(10, arr.length);
-  const buckets = Array.from({ length: bucketCount }, () => []);
-
-  for (let num of arr) {
-    const index = Math.min(
-      Math.floor(((num - min) / (max - min + 1)) * bucketCount),
-      bucketCount - 1
-    );
-    buckets[index].push(num);
-  }
-  pasosCubetas.push(buckets.map((b) => [...b]));
-  pasosBarra.push(buckets.flat());
-
-  for (let bucket of buckets) bucket.sort((a, b) => a - b);
-  pasosCubetas.push(buckets.map((b) => [...b]));
-  pasosBarra.push(buckets.flat());
-
-  return { pasosBarra, pasosCubetas };
-}
-
-// ===== RADIX SORT =====
-function radixSort(arr) {
-  const pasosBarra = [[...arr]];
-  const pasosCubetas = [];
-  if (arr.length === 0) return { pasosBarra, pasosCubetas };
-  const max = Math.max(...arr);
-  let exp = 1;
-  while (Math.floor(max / exp) > 0) {
-    const buckets = Array.from({ length: 10 }, () => []);
-    for (let num of arr) buckets[Math.floor((num / exp) % 10)].push(num);
-    pasosCubetas.push(buckets.map((b) => [...b]));
-    arr = buckets.flat();
-    pasosBarra.push([...arr]);
-    exp *= 10;
-  }
-  return { pasosBarra, pasosCubetas };
 }
 
 // ===== MODAL EXPLICACIÓN =====
@@ -191,7 +127,6 @@ function ModalExplicacion({ info, onClose }) {
           }
         `}</style>
 
-        {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
           <h2 style={{ margin: 0, fontSize: "1.3rem", color: info.color }}>
             {info.emoji} {info.nombre}
@@ -205,12 +140,10 @@ function ModalExplicacion({ info, onClose }) {
           >×</button>
         </div>
 
-        {/* Descripción */}
         <p style={{ color: "#cbd5e1", fontSize: "0.9rem", lineHeight: 1.7, marginBottom: "1.25rem" }}>
           {info.descripcion}
         </p>
 
-        {/* Pasos */}
         <div style={{ marginBottom: "1.25rem" }}>
           <p style={{ color: "#94a3b8", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.08em", marginBottom: "0.5rem" }}>
             ¿CÓMO FUNCIONA?
@@ -224,7 +157,6 @@ function ModalExplicacion({ info, onClose }) {
           </ol>
         </div>
 
-        {/* Complejidades */}
         <div style={{ marginBottom: "1rem" }}>
           <p style={{ color: "#94a3b8", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.08em", marginBottom: "0.5rem" }}>
             COMPLEJIDAD
@@ -386,17 +318,18 @@ function ModalBigO({ onClose }) {
 
 // ===== APP =====
 function App() {
-  const [datos, setDatos]             = useState("");
-  const [pasosBarra, setPasosBarra]   = useState([]);
+  const [datos, setDatos]               = useState("");
+  const [pasosBarra, setPasosBarra]     = useState([]);
   const [pasosCubetas, setPasosCubetas] = useState([]);
-  const [mergeArbol, setMergeArbol]   = useState(null);
-  const [algoritmo, setAlgoritmo]     = useState("merge");
-  const [tamanio, setTamanio]         = useState(10);
-  const [pasoActual, setPasoActual]   = useState(0);
-  const [jugando, setJugando]         = useState(false);
-  const [velocidad, setVelocidad]     = useState(1000);
-  const [modalInfo, setModalInfo]     = useState(false);   // modal explicación
-  const [modalBigO, setModalBigO]     = useState(false);   // modal big-o
+  const [mergeArbol, setMergeArbol]     = useState(null);
+  const [algoritmo, setAlgoritmo]       = useState("merge");
+  const [tamanio, setTamanio]           = useState(10);
+  const [pasoActual, setPasoActual]     = useState(0);
+  const [jugando, setJugando]           = useState(false);
+  const [velocidad, setVelocidad]       = useState(1000);
+  const [modalInfo, setModalInfo]       = useState(false);
+  const [modalBigO, setModalBigO]       = useState(false);
+  const [cargando, setCargando]         = useState(false); // ← nuevo: spinner mientras espera backend
 
   const generarAleatorios = () => {
     const aleatorios = Array.from({ length: tamanio }, () =>
@@ -405,24 +338,44 @@ function App() {
     setDatos(aleatorios.join(" "));
   };
 
-  const ordenar = () => {
+  // ===== ORDENAR — ahora llama al backend =====
+  const ordenar = async () => {
     const arr = datos.trim().split(/\s+/).map(Number).filter((n) => !isNaN(n));
     if (arr.length === 0) { alert("Ingresa números válidos"); return; }
 
-    if (algoritmo === "merge") {
-      setPasosBarra(mergeSort([...arr]));
-      setPasosCubetas([]);
-      setMergeArbol(buildMergeTree([...arr]));
-    } else if (algoritmo === "bucket") {
-      const { pasosBarra: pb, pasosCubetas: pc } = bucketSort([...arr]);
-      setPasosBarra(pb); setPasosCubetas(pc); setMergeArbol(null);
-    } else if (algoritmo === "radix") {
-      const { pasosBarra: pb, pasosCubetas: pc } = radixSort([...arr]);
-      setPasosBarra(pb); setPasosCubetas(pc); setMergeArbol(null);
-    }
+    setCargando(true);
+    try {
+      const res = await fetch("https://algoritmos-backend.onrender.com/ordenar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ valores: arr, algoritmo }),
+      });
 
-    setPasoActual(0);
-    setJugando(false);
+      if (!res.ok) throw new Error(`Backend respondió ${res.status}`);
+
+      const data = await res.json();
+
+      if (algoritmo === "merge") {
+        // merge_sort.py devuelve arrays planos directamente
+        setPasosBarra(data.pasos);
+        setPasosCubetas([]);
+        setMergeArbol(buildMergeTree([...arr])); // árbol sigue construyéndose en frontend
+      } else {
+        // radix/bucket devuelven array de cubetas por paso
+        // Prepend del array inicial para mantener el offset indiceCubeta = pasoActual - 1
+        setPasosBarra([arr, ...data.pasos.map((p) => p.flat())]);
+        setPasosCubetas(data.pasos);
+        setMergeArbol(null);
+      }
+
+      setPasoActual(0);
+      setJugando(false);
+
+    } catch (err) {
+      alert("❌ No se pudo conectar al backend.\n¿Está corriendo FastAPI en el puerto 8000?\n\nComando: uvicorn app:app --reload");
+    } finally {
+      setCargando(false);
+    }
   };
 
   useEffect(() => {
@@ -439,10 +392,7 @@ function App() {
 
   const getBarraColors = (data) => {
     if (pasoActual === pasosBarra.length - 1) return data.map(() => "#22c55e");
-    if (algoritmo === "merge") {
-      return data.map((_, i) => ["#3b82f6","#ef4444","#22c55e"][i % 3]);
-    }
-    return data.map((_, i) => ["#3b82f6","#ef4444","#22c55e"][i % 3]);
+    return data.map((_, i) => ["#3b82f6", "#ef4444", "#22c55e"][i % 3]);
   };
 
   return (
@@ -475,9 +425,10 @@ function App() {
           placeholder="Ej: 64 25 12 22 11"
         />
 
-        <button onClick={ordenar}>🚀 Ordenar</button>
+        <button onClick={ordenar} disabled={cargando}>
+          {cargando ? "⏳ Calculando..." : "🚀 Ordenar"}
+        </button>
 
-        {/* Botones nuevos */}
         <button onClick={() => setModalInfo(true)} title="Ver explicación del algoritmo">
           ℹ️ ¿Cómo funciona?
         </button>
