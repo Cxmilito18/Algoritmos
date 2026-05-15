@@ -1,0 +1,54 @@
+# Entorno virtual
+venv/
+env/
+ENV/
+.venv
+
+# Caché de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Distribución
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Streamlit
+.streamlit/secrets.toml
+.streamlit/.gitignore
+.streamlit/cache/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Vercel
+.vercel/
+
+# Archivos temporales
+*.tmp
+*.log
+.ipynb_checkpoints/
+
+# Sistema operativo
+Thumbs.db
+.DS_Store
