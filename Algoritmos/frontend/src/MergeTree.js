@@ -37,8 +37,9 @@ export default function MergeTree({ pasos, pasoActual }) {
                   data: arbol.valor,
                   backgroundColor: arbol.valor.map((val, idx) => {
                     if (pasoActual === pasos.length - 1) return "#22c55e"; // verde final
-                    if (idx % 2 === 0) return "#3b82f6"; // azul comparación
-                    return "#f97316"; // naranja merge
+                    if (idx % 3 === 0) return "#3b82f6"; // azul
+                    if (idx % 3 === 1) return "#ef4444"; // rojo
+                    return "#22c55e"; // verde
                   }),
                   borderRadius: 5,
                 },
