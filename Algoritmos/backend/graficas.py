@@ -1,7 +1,7 @@
 import time
 import matplotlib.pyplot as plt
-from merge_sort import MergeSort
-from utils import Utils
+from Algoritmos.backend.algoritmos.merge_sort import MergeSort
+from Algoritmos.backend.utils import Utils
 
 class Graficas:
 
