@@ -14,7 +14,7 @@ function normalizeBucket(raw) {
     const trimmed = raw.trim();
     if (!trimmed || trimmed === "[]") return [];
     return trimmed
-      .replace(/[\[\]]/g, "")
+      .replace(/[[\]]/g, "")
       .split(",")
       .map((s) => Number(s.trim()))
       .filter((n) => !isNaN(n));

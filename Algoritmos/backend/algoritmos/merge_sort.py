@@ -1,4 +1,6 @@
-def merge_sort(arr, pasos):
+def merge_sort(arr):
+    pasos = []
+
     def merge(arr, l, m, r):
         n1 = m - l + 1
         n2 = r - m
@@ -39,4 +41,4 @@ def merge_sort(arr, pasos):
             merge(arr, l, m, r)
 
     sort(0, len(arr) - 1)
-    return arr
+    return pasos

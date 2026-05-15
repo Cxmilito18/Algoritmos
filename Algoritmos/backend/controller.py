@@ -5,10 +5,10 @@ from algoritmos.bucket_sort import bucket_sort
 
 def ordenar_algoritmo(valores, algoritmo):
     if algoritmo == "merge":
-        return merge_sort(valores)
+        return merge_sort(valores.copy())
     elif algoritmo == "radix":
-        return radix_sort(valores)
+        return radix_sort(valores.copy())
     elif algoritmo == "bucket":
-        return bucket_sort(valores)
+        return bucket_sort(valores.copy())
     else:
         return []

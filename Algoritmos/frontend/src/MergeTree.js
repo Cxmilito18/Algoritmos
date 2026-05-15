@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useRef } from "react";
+import React, { useMemo, useRef } from "react";
 
 // ── Constantes de layout ──────────────────────────────────────────
 const LEVEL_H   = 110;
