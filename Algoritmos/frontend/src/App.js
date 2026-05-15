@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";  // ← quitado useRef
 import { Bar, Line } from "react-chartjs-2";
-import { Chart as ChartJS } from "chart.js/auto";
+import "chart.js/auto";  // ← quitado ChartJS que no se usaba
 import "./App.css";
 
 import MergeTree from "./MergeTree";
@@ -70,11 +70,11 @@ const INFO_ALGORITMOS = {
 // ===== BIG-O DATA =====
 const BIG_O_NS = [1, 5, 10, 20, 50, 100, 200, 500];
 function nlogn(n)  { return n * Math.log2(n); }
-function nk(n)     { return n * 3; }        // k ≈ 3 dígitos promedio
-function nplusk(n) { return n + 10; }       // k = 10 buckets
+function nk(n)     { return n * 3; }
+function nplusk(n) { return n + 10; }
 function ncuad(n)  { return n * n; }
 
-// ===== MERGE TREE (se sigue construyendo en frontend) =====
+// ===== MERGE TREE =====
 function buildMergeTree(arr) {
   if (!arr || arr.length === 0) return null;
   if (arr.length === 1) return { valor: arr, izquierda: null, derecha: null };
@@ -329,7 +329,7 @@ function App() {
   const [velocidad, setVelocidad]       = useState(1000);
   const [modalInfo, setModalInfo]       = useState(false);
   const [modalBigO, setModalBigO]       = useState(false);
-  const [cargando, setCargando]         = useState(false); // ← nuevo: spinner mientras espera backend
+  const [cargando, setCargando]         = useState(false);
 
   const generarAleatorios = () => {
     const aleatorios = Array.from({ length: tamanio }, () =>
@@ -338,7 +338,6 @@ function App() {
     setDatos(aleatorios.join(" "));
   };
 
-  // ===== ORDENAR — ahora llama al backend =====
   const ordenar = async () => {
     const arr = datos.trim().split(/\s+/).map(Number).filter((n) => !isNaN(n));
     if (arr.length === 0) { alert("Ingresa números válidos"); return; }
@@ -356,13 +355,10 @@ function App() {
       const data = await res.json();
 
       if (algoritmo === "merge") {
-        // merge_sort.py devuelve arrays planos directamente
         setPasosBarra(data.pasos);
         setPasosCubetas([]);
-        setMergeArbol(buildMergeTree([...arr])); // árbol sigue construyéndose en frontend
+        setMergeArbol(buildMergeTree([...arr]));
       } else {
-        // radix/bucket devuelven array de cubetas por paso
-        // Prepend del array inicial para mantener el offset indiceCubeta = pasoActual - 1
         setPasosBarra([arr, ...data.pasos.map((p) => p.flat())]);
         setPasosCubetas(data.pasos);
         setMergeArbol(null);
