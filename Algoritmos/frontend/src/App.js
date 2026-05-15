@@ -7,7 +7,7 @@ import MergeTree from "./MergeTree";
 import RadixBuckets from "./RadixBuckets";
 import BucketBoxes from "./BucketBoxes";
 
-// ===== ALGORITMOS LOCALES =====
+// ===== ALGORITMOS =====
 function mergeSort(arr) {
   const pasos = [];
   pasos.push([...arr]);
@@ -16,11 +16,8 @@ function mergeSort(arr) {
     let result = [];
     let i = 0, j = 0;
     while (i < left.length && j < right.length) {
-      if (left[i] <= right[j]) {
-        result.push(left[i++]);
-      } else {
-        result.push(right[j++]);
-      }
+      if (left[i] <= right[j]) result.push(left[i++]);
+      else result.push(right[j++]);
       pasos.push([...result, ...left.slice(i), ...right.slice(j)]);
     }
     return [...result, ...left.slice(i), ...right.slice(j)];
@@ -38,10 +35,21 @@ function mergeSort(arr) {
   return pasos;
 }
 
+// 🌳 Construye el árbol de división del merge sort
+function buildMergeTree(arr) {
+  if (!arr || arr.length === 0) return null;
+  if (arr.length === 1) return { valor: arr, izquierda: null, derecha: null };
+  const mid = Math.floor(arr.length / 2);
+  return {
+    valor: arr,
+    izquierda: buildMergeTree(arr.slice(0, mid)),
+    derecha: buildMergeTree(arr.slice(mid)),
+  };
+}
+
 function bucketSort(arr) {
   const pasos = [];
   pasos.push([...arr]);
-
   const max = Math.max(...arr);
   const min = Math.min(...arr);
   const bucketCount = Math.min(5, arr.length);
@@ -59,38 +67,33 @@ function bucketSort(arr) {
     result.push(...bucket);
     pasos.push([...result]);
   }
-
   return pasos;
 }
 
 function radixSort(arr) {
   const pasos = [];
   pasos.push([...arr]);
-
   if (arr.length === 0) return pasos;
-
   const max = Math.max(...arr);
   let exp = 1;
 
   while (Math.floor(max / exp) > 0) {
     const buckets = Array.from({ length: 10 }, () => []);
-
     for (let num of arr) {
       const digit = Math.floor((num / exp) % 10);
       buckets[digit].push(num);
     }
-
     arr = buckets.flat();
     pasos.push([...arr]);
     exp *= 10;
   }
-
   return pasos;
 }
 
 function App() {
   const [datos, setDatos] = useState("");
   const [pasos, setPasos] = useState([]);
+  const [mergeArbol, setMergeArbol] = useState(null); // 🌳 árbol de merge
   const [algoritmo, setAlgoritmo] = useState("merge");
   const [tamanio, setTamanio] = useState(10);
   const [pasoActual, setPasoActual] = useState(0);
@@ -105,15 +108,11 @@ function App() {
   };
 
   const ordenar = () => {
-    console.log("🔥 CLICK ORDENAR");
-
     const arr = datos
       .trim()
       .split(/\s+/)
       .map(Number)
       .filter((n) => !isNaN(n));
-
-    console.log("📦 ARRAY:", arr);
 
     if (arr.length === 0) {
       alert("Ingresa números válidos");
@@ -124,13 +123,15 @@ function App() {
 
     if (algoritmo === "merge") {
       resultado = mergeSort([...arr]);
+      setMergeArbol(buildMergeTree([...arr])); // 🌳 construir árbol
     } else if (algoritmo === "bucket") {
       resultado = bucketSort([...arr]);
+      setMergeArbol(null);
     } else if (algoritmo === "radix") {
       resultado = radixSort([...arr]);
+      setMergeArbol(null);
     }
 
-    console.log("✅ PASOS GENERADOS:", resultado.length);
     setPasos(resultado);
     setPasoActual(0);
     setJugando(false);
@@ -138,49 +139,42 @@ function App() {
 
   useEffect(() => {
     let intervalo;
-
     if (jugando && pasos.length > 0 && pasoActual < pasos.length - 1) {
       intervalo = setInterval(() => {
         setPasoActual((prev) => prev + 1);
       }, velocidad);
     }
-
     return () => clearInterval(intervalo);
   }, [jugando, pasoActual, pasos, velocidad]);
 
-  const pasoActualData =
-    Array.isArray(pasos[pasoActual]) ? pasos[pasoActual] : [];
+  const pasoActualData = Array.isArray(pasos[pasoActual]) ? pasos[pasoActual] : [];
 
-  // 🎨 Función para generar colores dinámicos en las barras
+  // 🎨 Solo rojo, azul y verde
   const getBarraColors = (data) => {
     const isOrdenado = pasoActual === pasos.length - 1;
-    
-    if (isOrdenado) {
-      // Todo verde cuando está ordenado
-      return data.map(() => "#22c55e");
+
+    // Verde completo al terminar
+    if (isOrdenado) return data.map(() => "#22c55e");
+
+    if (algoritmo === "merge") {
+      return data.map((_, idx) => {
+        if (idx % 3 === 0) return "#3b82f6"; // Azul
+        if (idx % 3 === 1) return "#ef4444"; // Rojo
+        return "#22c55e";                    // Verde
+      });
     }
 
-    // Colores dinámicos según el algoritmo
-    if (algoritmo === "merge") {
-      return data.map((val, idx) => {
-        // Colores alternados para visualizar el proceso de merge
-        if (idx % 3 === 0) return "#3b82f6"; // Azul
-        if (idx % 3 === 1) return "#f97316"; // Naranja
-        return "#ec4899"; // Rosa
-      });
-    } else if (algoritmo === "radix") {
-      return data.map((val, idx) => {
-        // Gradiente de colores para radix
-        const hue = (idx / data.length) * 360;
-        return `hsl(${hue}, 70%, 50%)`;
-      });
-    } else if (algoritmo === "bucket") {
+    if (algoritmo === "radix") {
+      const colors = ["#3b82f6", "#ef4444", "#22c55e"];
+      return data.map((_, idx) => colors[idx % 3]);
+    }
+
+    if (algoritmo === "bucket") {
       return data.map((val) => {
-        // Color según el valor
         const ratio = val / 100;
         if (ratio < 0.33) return "#3b82f6"; // Azul
-        if (ratio < 0.66) return "#f97316"; // Naranja
-        return "#22c55e"; // Verde
+        if (ratio < 0.66) return "#ef4444"; // Rojo
+        return "#22c55e";                   // Verde
       });
     }
 
@@ -193,10 +187,7 @@ function App() {
       <p className="subtitulo">Simulador interactivo paso a paso</p>
 
       <div className="panel-superior">
-        <select
-          value={algoritmo}
-          onChange={(e) => setAlgoritmo(e.target.value)}
-        >
+        <select value={algoritmo} onChange={(e) => setAlgoritmo(e.target.value)}>
           <option value="merge">Merge Sort</option>
           <option value="radix">Radix Sort</option>
           <option value="bucket">Bucket Sort</option>
@@ -222,9 +213,7 @@ function App() {
 
       {pasos.length > 0 && (
         <div className="visualizador-card">
-          <h3>
-            Paso {pasoActual + 1} de {pasos.length}
-          </h3>
+          <h3>Paso {pasoActual + 1} de {pasos.length}</h3>
 
           {pasoActualData.length > 0 && (
             <div className="barras-principal">
@@ -249,17 +238,14 @@ function App() {
                     x: { ticks: { color: "#f1f5f9" } },
                     y: { ticks: { color: "#f1f5f9" } },
                   },
-                  animation: {
-                    duration: 300,
-                    easing: "easeInOutQuart",
-                  },
+                  animation: { duration: 300, easing: "easeInOutQuart" },
                 }}
               />
             </div>
           )}
 
           {algoritmo === "merge" && (
-            <MergeTree pasos={pasos} pasoActual={pasoActual} />
+            <MergeTree arbol={mergeArbol} pasos={pasos} pasoActual={pasoActual} />
           )}
           {algoritmo === "radix" && (
             <RadixBuckets pasos={pasos} pasoActual={pasoActual} />
@@ -269,24 +255,17 @@ function App() {
           )}
 
           <div className="controles">
-            <button onClick={() => setPasoActual(0)}>
-              ⏮️ Reiniciar
-            </button>
-
+            <button onClick={() => setPasoActual(0)}>⏮️ Reiniciar</button>
             <button onClick={() => setJugando(!jugando)}>
               {jugando ? "⏸️ Pausar" : "▶️ Reproducir"}
             </button>
-
             <button
               onClick={() =>
-                setPasoActual((prev) =>
-                  prev < pasos.length - 1 ? prev + 1 : prev
-                )
+                setPasoActual((prev) => (prev < pasos.length - 1 ? prev + 1 : prev))
               }
             >
               ⏭️ Siguiente
             </button>
-
             <label>Velocidad:</label>
             <input
               type="range"
