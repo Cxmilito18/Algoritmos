@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";  // ← quitado useRef
+import React, { useState, useEffect } from "react";
 import { Bar, Line } from "react-chartjs-2";
-import "chart.js/auto";  // ← quitado ChartJS que no se usaba
+import "chart.js/auto";
 import "./App.css";
 
 import MergeTree from "./MergeTree";
